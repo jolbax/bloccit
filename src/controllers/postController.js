@@ -1,4 +1,5 @@
 const postQueries = require("../db/queries.posts.js");
+const flairQueries = require("../db/queries.flairs.js");
 
 module.exports = {
   new(req, res, next) {
@@ -23,7 +24,17 @@ module.exports = {
       if (err || post === null) {
         res.redirect(404, "/");
       } else {
-        res.render("posts/show", { post });
+        if(!post.flairId) {
+          res.render("posts/show", { post });
+        } else {
+          flairQueries.getFlair(post.flairId, (err, flair) => {
+            if (err || !flair ) {
+              res.status(500).render("posts/show", { post });
+            } else {
+              res.render("posts/show", { post, flair });
+            }
+          })
+        }
       }
     });
   },
@@ -59,5 +70,14 @@ module.exports = {
         res.redirect(`/topics/${req.params.topicId}/posts/${req.params.id}`);
       }
     });
+  },
+  setFlair(req, res, next) {
+    postQueries.setFlair(req.params.id, req.params.flairId, (err, post) => {
+      if(err || post === null) {
+        res.redirect(500, `/topics/${req.params.topicId}/posts/${req.params.id}`);
+      } else {
+        res.redirect(`/topics/${req.params.topicId}/posts/${req.params.id}`);
+      }
+    })
   }
 };

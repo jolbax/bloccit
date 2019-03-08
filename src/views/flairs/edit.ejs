@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <% include ../static/partials/head.ejs %>
+</head>
+
+<body>
+  <% include ../static/partials/navbar.ejs %>
+
+  <main class="container">
+
+    <br>
+
+    <form action="/topics/<%= topicId %>/posts/<%= postId %>/flair/<%= flair.id %>/update" method="post">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title">Edit Flair</h5>
+        </div>
+        <div class="card-body">
+          <div class="form-group">
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <span class="input-group-text" id="inputGroup-sizing-sm">Name</span>
+              </div>
+              <input value="<%= locals.flair ? flair.name : null %>" type="text" class="form-control" name="name"
+                aria-describedby="inputGroup-sizing-sm" placeholder="Enter a name" />
+            </div>
+          </div>
+
+          <div class="input-group mb-3">
+            <div class="input-group-prepend">
+              <label class="input-group-text" for="inputGroupSelect01">Color</label>
+            </div>
+            <select class="custom-select" name="color" id="inputGroupSelect01">
+              <option value="<%= locals.flair ? flair.color : '' %>" selected><%= locals.flair ? flair.color : "Choose..." %>
+              </option>
+              <option value="primary">blue</option>
+              <option value="success">green</option>
+              <option value="danger">red</option>
+              <option value="warning">yellow</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <br>
+      <button type="submit" class="btn btn-primary">Update</button>
+    </form>
+  </main>
+
+  <% include ../static/partials/baseScripts.ejs %>
+
+</body>
+
+</html>
