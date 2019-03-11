@@ -68,6 +68,23 @@ describe("routes: topics", () => {
         });
       });
     });
+    it("should not create a topic that fails validation", (done) => {
+      const options = {
+        url: `${base}create`,
+        form: {
+          title: "x",
+          description: "y"
+        }
+      }
+      request.post(options, (err, res, body) => {
+        expect(err).toBeNull();
+        Topic.findOne({where: {title: "x"}})
+        .then(topic => {
+          expect(topic).toBeNull();
+          done();
+        })
+      })
+    });
   });
 
   describe("GET /topics/:id", () => {
@@ -125,6 +142,24 @@ describe("routes: topics", () => {
         })
         .then((topic) => {
           expect(topic.title).toContain("JavaScript Frameworks");
+          done();
+        });
+      });
+    });
+    it("should not update the topic that fails validation", (done) => {
+      const options = {
+        url: `${base}${this.topic.id}/update`,
+        form: {
+          title: "JavaScript Frameworks"
+        }
+      };
+      request.post(options, (err, res, body) => {
+        expect(err).toBeNull();
+        Topic.findOne({
+          where: { title: "JavaScript Frameworks" }
+        })
+        .then((topic) => {
+          expect(topic).toBeNull();
           done();
         });
       });
