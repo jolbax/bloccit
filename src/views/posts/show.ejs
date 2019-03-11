@@ -9,12 +9,26 @@
     <main class="container">
       <br>
       <% include ../static/partials/messages.ejs %>
-      <h1><%= post.title %></h1>
-        <a href="/topics/<%= post.topicId %>/posts/<%= post.id %>/edit" class="btn btn-warning">Edit</a>
-        <form style="display:initial" action="/topics/<%= post.topicId %>/posts/<%= post.id %>/destroy" method="post">
-          <button type="submit" class="btn btn-danger">Delete</button>
-        </form>
-      <p><%= post.body %></p>
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title">
+            <%= post.title %>
+            <span
+              class="badge badge-pill badge-<%= locals.flair ? flair.color : "secondary" %>"><%= locals.flair ? flair.name : "..." %></span>
+          </h5>
+        </div>
+        <div class="card-body">
+          <p class="card-text"><%= post.body %></p>
+        </div>
+        <div class="card-footer">
+          <a href="/topics/<%= post.topicId %>/posts/<%= post.id %>/edit" class="btn btn-warning">Edit</a>
+          <form style="display:initial" action="/topics/<%= post.topicId %>/posts/<%= post.id %>/destroy" method="post">
+            <button type="submit" class="btn btn-danger">Delete</button>
+          </form>
+          <a href="/topics/<%= post.topicId %>/posts/<%= post.id %>/<%= locals.flair ? `flair/${flair.id}/edit`:"flair/new" %>" class="btn btn-outline-info"><%= locals.flair ? "Edit flair":"Add flair" %></a>
+        </div>
+      </div>
+      <br>
     </main>
 
     <% include ../static/partials/baseScripts.ejs %>

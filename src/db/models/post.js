@@ -12,6 +12,10 @@ module.exports = (sequelize, DataTypes) => {
     topicId: {
       type: DataTypes.INTEGER,
       allowNull: false
+    },
+    flairId: {
+      type: DataTypes.INTEGER,
+      allowNull: true
     }
   }, {});
   Post.associate = function(models) {
@@ -19,6 +23,10 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: "topicId",
       onDelete: "CASCADE"
     })
+    Post.belongsTo(models.Flair, {
+      foreignKey: "flairId"
+    })
   };
+
   return Post;
 };
