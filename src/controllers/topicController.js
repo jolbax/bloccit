@@ -3,7 +3,7 @@ module.exports = {
   index(req, res, next) {
     topicQueries.getAllTopics((err, topics) => {
       if (err) {
-        res.redirect(500, "static/index");
+        res.redirect(500, "/");
       } else {
         res.render("topics/index", { topics });
       }
@@ -37,7 +37,7 @@ module.exports = {
   destroy(req, res, next) {
     topicQueries.deleteTopic(req.params.id, (err, topic) => {
       if (err) {
-        res.redirect(500, `/topics/${topic.id}`);
+        res.redirect(500, `/topics/${req.params.id}`);
       } else {
         res.redirect(303, "/topics");
       }
