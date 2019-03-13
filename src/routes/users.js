@@ -9,5 +9,6 @@ router.post("/users", validation.userChecks, validation.validateForm, userContro
 router.get("/users/sign_in", userController.singInForm);
 router.post("/users/sign_in", validation.userChecks, validation.validateForm, userController.signIn);
 router.get("/users/sign_out", userController.signOut);
+router.get("/auth/github/callback", userController.return);
 
 module.exports = router;

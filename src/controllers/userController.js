@@ -13,7 +13,7 @@ module.exports = {
     };
     userQueries.createUser(newUser, (err, user) => {
       if (err) {
-        res.flash("error", err);
+        req.flash("error", err);
         res.redirect("/users/sign_up");
       } else {
         passport.authenticate("local")(req, res, () => {
@@ -27,7 +27,7 @@ module.exports = {
     res.render("users/sign_in");
   },
   signIn(req, res, next) {
-    passport.authenticate("local")(req, res, () => {
+    passport.authenticate("github")(req, res, () => {
       if (!req.user) {
         req.flash("notice", "Sign in failed. Please try again.");
         res.redirect("/users/sign_in");
@@ -41,5 +41,10 @@ module.exports = {
     req.logout();
     req.flash("notice", "You've successfully signed out!");
     res.redirect("/");
+  },
+  return(req, res, next) {
+    passport.authenticate('github')(req, res, () => {
+      res.redirect('/');
+    })
   }
 };

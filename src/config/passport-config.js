@@ -1,5 +1,6 @@
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
+const GitHubStrategy = require("passport-github").Strategy;
 const User = require("../db/models").User;
 const authHelper = require("../auth/helpers");
 
@@ -9,37 +10,24 @@ module.exports = {
     app.use(passport.session());
 
     passport.use(
-      new LocalStrategy(
+      new GitHubStrategy(
         {
-          usernameField: "email"
+          clientID: "4a9ada78281f1eb4beb6",
+          clientSecret: "7353937593a3e5509c6a4a7cae228e7859cc38c0",
+          callbackURL: 'http://localhost:3000/auth/github/callback'
         },
-        (email, password, done) => {
-          User.findOne({
-            where: { email }
-          }).then(user => {
-            if (!user || !authHelper.comparePass(password, user.password)) {
-              return done(null, false, {
-                message: "Invalid email or password"
-              });
-            }
+        (accessToken, refreshToken, profile, done) => {
             return done(null, user);
-          });
         }
       )
     );
 
     passport.serializeUser((user, callback) => {
-      callback(null, user.id);
+      callback(null, user);
     });
 
-    passport.deserializeUser((id, callback) => {
-      User.findByPk(id)
-        .then(user => {
-          callback(null, user);
-        })
-        .catch(err => {
-          callback(err);
-        });
+    passport.deserializeUser((obj, callback) => {
+      callback(null, obj);
     });
   }
 };
