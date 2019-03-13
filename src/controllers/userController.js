@@ -13,7 +13,7 @@ module.exports = {
     };
     userQueries.createUser(newUser, (err, user) => {
       if (err) {
-        res.flash("error", err);
+        req.flash("error", err);
         res.redirect("/users/sign_up");
       } else {
         passport.authenticate("local")(req, res, () => {
