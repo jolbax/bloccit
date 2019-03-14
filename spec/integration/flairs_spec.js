@@ -108,19 +108,24 @@ describe("routes : flairs", () => {
   });
 
   describe("GET /topics/:topicId/posts/:postId", () => {
-    it("should render a post view with the associated flair", (done) => {
-      request.get(`${base}${this.topic.id}/posts/${this.post.id}`, (err, res, body) => {
-        expect(body).toContain("Riding bicycle with open mouth");
-        expect(body).toContain("inspiration");
-        done();
-      })
-    })
-  })
+    it("should render a post view with the associated flair", done => {
+      request.get(
+        `${base}${this.topic.id}/posts/${this.post.id}`,
+        (err, res, body) => {
+          expect(body).toContain("Riding bicycle with open mouth");
+          expect(body).toContain("inspiration");
+          done();
+        }
+      );
+    });
+  });
 
   describe("GET /topics/:topicId/posts/:postId/flair/:flairId/edit", () => {
     it("should render flair edit form", done => {
       request.get(
-        `${base}${this.topic.id}/posts/${this.post.id}/flair/${this.flair.id}/edit`,
+        `${base}${this.topic.id}/posts/${this.post.id}/flair/${
+          this.flair.id
+        }/edit`,
         (err, res, body) => {
           expect(err).toBeNull();
           expect(body).toContain("Flair");
@@ -133,11 +138,12 @@ describe("routes : flairs", () => {
     });
   });
 
-
   describe("POST /topics/:topicId/posts/:postId/flair/:flairId/update", () => {
     it("should update a flair and redirect", done => {
       let options = {
-        url: `${base}${this.topic.id}/posts/${this.post.id}/flair/${this.flair.id}/update`,
+        url: `${base}${this.topic.id}/posts/${this.post.id}/flair/${
+          this.flair.id
+        }/update`,
         form: {
           name: "tech",
           color: "black"
@@ -145,16 +151,26 @@ describe("routes : flairs", () => {
       };
       request.post(options, (err, res, body) => {
         expect(err).toBeNull();
-        Flair.findByPk(this.flair.id)
-          .then(flair => {
-            expect(flair.name).toBe("tech");
-            expect(flair.color).toBe("black");
-            done();
-          })
-          .catch(err => {
-            console.log(err);
-            done();
-          });
+        Flair.findOne({ where: options.form }).then(flair => {
+          request.post(
+            `${base}${this.topic.id}/posts/${this.post.id}/flair/${flair.id}/setFlair`,
+            (err, res, body) => {
+              Post.findByPk(this.post.id).then((post) => {
+                expect(post.flairId).toBe(flair.id);
+                Flair.findByPk(post.flairId)
+                  .then(flair => {
+                    expect(flair.name).toBe("tech");
+                    expect(flair.color).toBe("black");
+                    done();
+                  })
+                  .catch(err => {
+                    console.log(err);
+                    done();
+                  });
+              });
+            }
+          );
+        });
       });
     });
   });
