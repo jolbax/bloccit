@@ -17,7 +17,7 @@ module.exports = {
           callbackURL: 'http://localhost:3000/auth/github/callback'
         },
         (accessToken, refreshToken, profile, done) => {
-            return done(null, user);
+            return done(null, profile);
         }
       )
     );

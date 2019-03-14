@@ -27,15 +27,7 @@ module.exports = {
     res.render("users/sign_in");
   },
   signIn(req, res, next) {
-    passport.authenticate("github")(req, res, () => {
-      if (!req.user) {
-        req.flash("notice", "Sign in failed. Please try again.");
-        res.redirect("/users/sign_in");
-      } else {
-        req.flash("notice", "You've successfully signed in!");
-        res.redirect("/");
-      }
-    });
+    passport.authenticate("github")(req, res, () => {});
   },
   signOut(req, res, next) {
     req.logout();
@@ -43,8 +35,14 @@ module.exports = {
     res.redirect("/");
   },
   return(req, res, next) {
-    passport.authenticate('github')(req, res, () => {
-      res.redirect('/');
+    passport.authenticate('github', {failureRedirect: '/users/sign_in'})(req, res, () => {
+      if (!req.user) {
+        req.flash("notice", "Sign in failed. Please try again.");
+        res.redirect("/users/sign_in");
+      } else {
+        req.flash("notice", "You've successfully signed in!");
+        res.redirect("/");
+      }
     })
   }
 };
