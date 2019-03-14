@@ -46,7 +46,12 @@ module.exports = {
     });
   },
   update(req, res, next) {
-    flairQueries.updateFlair(req.params.flairId, req.body, (err, flair) => {
+    let updatedFlair = {
+      name: req.body.name,
+      color: req.body.color,
+      topicId: req.params.topicId
+    }
+    flairQueries.updateFlair(req.params.flairId, updatedFlair, (err, flair) => {
       if (err || !flair) {
         res.redirect(
           500,
@@ -56,7 +61,10 @@ module.exports = {
         );
       } else {
         res.redirect(
-          `/topics/${req.params.topicId}/posts/${req.params.postId}`
+          307,
+          `/topics/${req.params.topicId}/posts/${req.params.postId}/flair/${
+          flair.id
+          }/setFlair`
         );
       }
     });
