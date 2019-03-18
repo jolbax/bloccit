@@ -1,6 +1,7 @@
 const Post = require("./models").Post;
 const Topic = require("./models").Topic;
 const Flair = require("./models").Flair;
+const Authorizer = require("../policies/flair");
 
 module.exports = {
   addFlair(flair, callback) {
@@ -22,6 +23,22 @@ module.exports = {
       .catch(err => {
         callback(err);
       });
+  },
+  validateNewAndEdit(req, callback) {
+    Post.findByPk(req.params.postId)
+    .then((post) => {
+      if(!post) {
+        return callback("Post not found");
+      }
+
+      const authorized = new Authorizer(req.user, post).new();
+
+      if(authorized) {
+        callback(null, post)
+      } else {
+        callback("Forbidden");
+      }
+    })
   },
   deleteFlair(id, callback) {
     return Flair.destroy({where:{ id}})

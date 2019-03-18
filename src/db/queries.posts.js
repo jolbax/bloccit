@@ -1,6 +1,7 @@
 const Post = require("./models").Post;
 const Topic = require("./models").Topic;
 const Flair = require("./models").Flair;
+const Authorizer = require("../policies/post");
 
 module.exports = {
   addPost(newPost, callback) {
@@ -14,52 +15,77 @@ module.exports = {
   },
   getPost(id, callback) {
     return Post.findByPk(id)
-      .then(post => {
-        callback(null, post);
-      })
-      .catch(err => {
+    .then(post => {
+      callback(null, post);
+    })
+    .catch(err => {
         callback(err);
       });
   },
-  deletePost(id, callback) {
-    return Post.destroy({ where: { id } })
-      .then(deletedRecordsCount => {
-        callback(null, deletedRecordsCount);
-      })
-      .catch(err => {
-        callback(err);
-      });
+  deletePost(req, callback) {
+    return Post.findByPk(req.params.id).then(post => {
+      const authorized = new Authorizer(req.user, post).destroy();
+      if(authorized) {
+        post.destroy().then(res => {
+          callback(null, post);
+        });
+      } else {
+        req.flash("notice", "You are not authorized to do that");
+        callback(401);
+      }
+    })
+    .catch((err) => {
+      callback(err);
+    });
   },
-  updatePost(id, updatedPost, callback) {
-    return Post.findByPk(id).then(post => {
+  updatePost(req, updatedPost, callback) {
+    return Post.findByPk(req.params.id).then(post => {
       if (!post) {
         return callback("Post not found");
       }
 
-      post
-        .update(updatedPost, {
-          fields: Object.keys(updatedPost)
-        })
-        .then(() => {
-          callback(null, post);
-        })
-        .catch(err => {
-          callback(err);
-        });
-    });
-  },
-  setFlair(postId, flairId, callback) {
-    return Post.findByPk(postId).then(post => {
-      Flair.findByPk(flairId).then(flair => {
+      const authorized = new Authorizer(req.user, post).update();
+
+      if(authorized){
         post
-          .setFlair(flair)
+          .update(updatedPost, {
+            fields: Object.keys(updatedPost)
+          })
           .then(() => {
             callback(null, post);
           })
           .catch(err => {
             callback(err);
           });
-      });
+      } else {
+        req.flash("notice", "You are not authorized to do that");
+        callback("Forbidden");
+      }
+    });
+  },
+  setFlair(req, callback) {
+    return Post.findByPk(req.params.id).then(post => {
+      if(!post){
+        return callback("Post not found. Cannot set flair");
+      }
+
+      const authorized = new Authorizer(req.user, post).setFlair();
+
+      if(authorized) {
+        Flair.findByPk(req.params.flairId).then(flair => {
+          post
+            .setFlair(flair)
+            .then(() => {
+              callback(null, post);
+            })
+            .catch(err => {
+              callback(err);
+            });
+        });
+      } else {
+        req.flash("notice", "You are not authorized to do that");
+        callback(401);
+      }
     });
   }
 };

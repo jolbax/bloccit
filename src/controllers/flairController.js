@@ -1,10 +1,20 @@
 const flairQueries = require("../db/queries.flairs.js");
+const Authorizer = require("../policies/flair");
 
 module.exports = {
   new(req, res, next) {
-    res.render("flairs/new", {
-      topicId: req.params.topicId,
-      postId: req.params.postId
+    flairQueries.validateNewAndEdit(req, (err, post) => {
+      if (err) {
+        req.flash("notice", "You are not authorized to do that");
+        res.redirect(
+          `/topics/${req.params.topicId}/posts/${req.params.postId}`
+        );
+      } else {
+        res.render("flairs/new", {
+          topicId: req.params.topicId,
+          postId: req.params.postId
+        });
+      }
     });
   },
   create(req, res, next) {
@@ -30,17 +40,26 @@ module.exports = {
     });
   },
   edit(req, res, next) {
-    flairQueries.getFlair(req.params.flairId, (err, flair) => {
-      if (err || !flair) {
+    flairQueries.validateNewAndEdit(req, (err, post) => {
+      if (err) {
+        req.flash("notice", "You are not allowed to do that");
         res.redirect(
-          400,
           `/topics/${req.params.topicId}/posts/${req.params.postId}`
         );
       } else {
-        res.render("flairs/edit", {
-          flair,
-          topicId: req.params.topicId,
-          postId: req.params.postId
+        flairQueries.getFlair(req.params.flairId, (err, flair) => {
+          if (err || !flair) {
+            res.redirect(
+              400,
+              `/topics/${req.params.topicId}/posts/${req.params.postId}`
+            );
+          } else {
+            res.render("flairs/edit", {
+              flair,
+              topicId: req.params.topicId,
+              postId: req.params.postId
+            });
+          }
         });
       }
     });
@@ -50,7 +69,7 @@ module.exports = {
       name: req.body.name,
       color: req.body.color,
       topicId: req.params.topicId
-    }
+    };
     flairQueries.updateFlair(req.params.flairId, updatedFlair, (err, flair) => {
       if (err || !flair) {
         res.redirect(
@@ -63,7 +82,7 @@ module.exports = {
         res.redirect(
           307,
           `/topics/${req.params.topicId}/posts/${req.params.postId}/flair/${
-          flair.id
+            flair.id
           }/setFlair`
         );
       }
