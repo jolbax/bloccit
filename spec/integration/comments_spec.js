@@ -193,6 +193,110 @@ describe("routes : comments", () => {
           );
         });
       });
+
+      it("should not delete the comment of another member", done => {
+        request.get(
+          {
+            url: "http://localhost:3000/auth/fake",
+            form: {
+              userId: 0
+            }
+          },
+          (err, res, body) => {
+            User.create({
+              email: "cheater@example.com",
+              password: "password",
+              role: "member"
+            }).then(newUser => {
+              request.get(
+                {
+                  url: "http://localhost:3000/auth/fake",
+                  form: {
+                    role: "member",
+                    userId: newUser.id
+                  }
+                },
+                (err, res, body) => {
+                  Comment.findAll().then(comments => {
+                    const commentCountBeforeDelete = comments.length;
+
+                    expect(commentCountBeforeDelete).toBe(1);
+                    request.post(
+                      `${base}${this.topic.id}/posts/${this.post.id}/comments/${
+                        this.comment.id
+                      }/destroy`,
+                      (err, res, body) => {
+                        expect(res.statusCode).toBe(401);
+                        Comment.findAll()
+                          .then(comments => {
+                            expect(err).toBeNull();
+                            expect(comments.length).toBe(
+                              commentCountBeforeDelete
+                            );
+                            done();
+                          })
+                          .catch(err => {
+                            console.log(err);
+                            done();
+                          });
+                      }
+                    );
+                  });
+                }
+              );
+            });
+          }
+        );
+      });
+      it("should delete the comment of another member as admin", done => {
+        request.get(
+          {
+            url: "http://localhost:3000/auth/fake",
+            form: {
+              userId: 0
+            }
+          },
+          (err, res, body) => {
+            User.create({
+              email: "admin@example.com",
+              password: "password",
+              role: "admin"
+            }).then(newUser => {
+              request.get(
+                {
+                  url: "http://localhost:3000/auth/fake",
+                  form: {
+                    role: "admin",
+                    userId: newUser.id
+                  }
+                },
+                (err, res, body) => {
+                  request.post(
+                    `${base}${this.topic.id}/posts/${this.post.id}/comments/${
+                      this.comment.id
+                    }/destroy`,
+                    (err, res, body) => {
+                      expect(err).toBeNull();
+                      expect(res.statusCode).toBe(302);
+                      setTimeout(() => {
+                        Comment.findByPk(this.comment.id)
+                          .then(deletedComment => {
+                            expect(deletedComment).toBeNull();
+                            done();
+                          })
+                          .catch(err => {
+                            console.log(err);
+                            done();
+                          });
+                      }, 1000);
+                    }
+                  );
+                }
+              );
+            });
+          }
+        );
+      });
     });
   });
 });
