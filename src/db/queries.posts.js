@@ -1,6 +1,8 @@
 const Post = require("./models").Post;
 const Topic = require("./models").Topic;
 const Flair = require("./models").Flair;
+const Comment = require("./models").Comment;
+const User = require("./models").User;
 const Authorizer = require("../policies/post");
 
 module.exports = {
@@ -14,29 +16,38 @@ module.exports = {
       });
   },
   getPost(id, callback) {
-    return Post.findByPk(id)
-    .then(post => {
-      callback(null, post);
+    return Post.findByPk(id, {
+      include: [
+        {
+          model: Comment,
+          as: "comments",
+          include: [{ model: User }]
+        }
+      ]
     })
-    .catch(err => {
+      .then(post => {
+        callback(null, post);
+      })
+      .catch(err => {
         callback(err);
       });
   },
   deletePost(req, callback) {
-    return Post.findByPk(req.params.id).then(post => {
-      const authorized = new Authorizer(req.user, post).destroy();
-      if(authorized) {
-        post.destroy().then(res => {
-          callback(null, post);
-        });
-      } else {
-        req.flash("notice", "You are not authorized to do that");
-        callback(401);
-      }
-    })
-    .catch((err) => {
-      callback(err);
-    });
+    return Post.findByPk(req.params.id)
+      .then(post => {
+        const authorized = new Authorizer(req.user, post).destroy();
+        if (authorized) {
+          post.destroy().then(res => {
+            callback(null, post);
+          });
+        } else {
+          req.flash("notice", "You are not authorized to do that");
+          callback(401);
+        }
+      })
+      .catch(err => {
+        callback(err);
+      });
   },
   updatePost(req, updatedPost, callback) {
     return Post.findByPk(req.params.id).then(post => {
@@ -46,7 +57,7 @@ module.exports = {
 
       const authorized = new Authorizer(req.user, post).update();
 
-      if(authorized){
+      if (authorized) {
         post
           .update(updatedPost, {
             fields: Object.keys(updatedPost)
@@ -65,13 +76,13 @@ module.exports = {
   },
   setFlair(req, callback) {
     return Post.findByPk(req.params.id).then(post => {
-      if(!post){
+      if (!post) {
         return callback("Post not found. Cannot set flair");
       }
 
       const authorized = new Authorizer(req.user, post).setFlair();
 
-      if(authorized) {
+      if (authorized) {
         Flair.findByPk(req.params.flairId).then(flair => {
           post
             .setFlair(flair)

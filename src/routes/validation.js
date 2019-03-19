@@ -33,6 +33,10 @@ userChecks = [
     .custom((value, { req }) => value === req.body.password)
 ];
 
+commentChecks = [
+  check("body", "must not be empty").not().isEmpty()
+]
+
 module.exports = {
   validateForm(req, res, next) {
     const errors = validationResult(req);
@@ -47,5 +51,6 @@ module.exports = {
   },
   postChecks,
   topicChecks,
-  userChecks
+  userChecks,
+  commentChecks
 };
