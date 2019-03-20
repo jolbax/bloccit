@@ -22,10 +22,10 @@ module.exports = {
         {
           model: Comment,
           as: "comments",
-          include: [
-            { model: User }
-          ]
-        }, { model: Vote, as: "votes" }
+          include: [{ model: User }]
+        },
+        { model: Vote, as: "votes" },
+        { model: Flair, as: "flair" }
       ]
     })
       .then(post => {

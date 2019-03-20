@@ -28,7 +28,8 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: "CASCADE"
     })
     Post.belongsTo(models.Flair, {
-      foreignKey: "flairId"
+      foreignKey: "flairId",
+      as: "flair"
     })
     Post.belongsTo(models.User, {
       foreignKey: "userId",

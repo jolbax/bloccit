@@ -45,7 +45,7 @@ module.exports = {
             if (err || !flair) {
               res.status(500).render("posts/show", { post });
             } else {
-              res.render("posts/show", { post, flair });
+              res.render("posts/show", { post });
             }
           });
         }
