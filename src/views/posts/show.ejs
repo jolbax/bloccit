@@ -11,11 +11,16 @@
       <% include ../static/partials/messages.ejs %>
       <div class="card">
         <div class="card-header">
-          <h5 class="card-title">
-            <%= post.title %>
+          <div style="display: flex; align-items:center">
+              <% if(currentUser) { %>
+                <% include ../votes/voting.ejs %>
+              <% } %>
+            <h5 class="card-title" style="padding-right: 20px;">
+              <%= post.title %>
+            </h5>
             <span
               class="badge badge-pill badge-<%= locals.flair ? flair.color : "secondary" %>"><%= locals.flair ? flair.name : "..." %></span>
-          </h5>
+          </div>
         </div>
         <div class="card-body">
           <p class="card-text"><%= post.body %></p>
