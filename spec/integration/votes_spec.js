@@ -99,6 +99,7 @@ describe("routes: votes", () => {
         done();
       });
     });
+
     describe("GET /topics/:topicId/posts/:postId/votes/upvote", () => {
       it("should create an upvote", (done) => {
         const options = {
@@ -122,6 +123,37 @@ describe("routes: votes", () => {
               console.log(err);
               done();
             });
+        });
+      });
+
+      it("should not create more than one vote, respectively upvote, per user for a specific post", (done) => {
+        const options = {
+          url: `${base}${this.topic.id}/posts/${this.post.id}/votes/upvote`
+        };
+        request.get(options, (err, res, body) => {
+          expect(err).toBeNull();
+          expect(res.statusCode).toBe(404);
+          request.get(options, (err, res, body) => {
+            Vote.findAll({
+              where: {
+                userId: this.user.id,
+                postId: this.post.id
+              }
+            })
+            .then((votes) => {
+            expect(res.statusCode).toBe(404);
+            expect(votes).not.toBeNull();
+            expect(votes.length).toBe(1);
+            expect(votes[0].value).toBe(1);
+            expect(votes[0].userId).toBe(this.user.id);
+            expect(votes[0].postId).toBe(this.post.id);
+            done();
+            })
+            .catch((err) => {
+              console.log(err);
+              done();
+            });
+          })
         });
       });
     });
