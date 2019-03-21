@@ -1,7 +1,8 @@
+const Comment = require("./models").Comment;
+const Favorite = require("./models").Favorite;
+const Flair = require("./models").Flair;
 const Post = require("./models").Post;
 const Topic = require("./models").Topic;
-const Flair = require("./models").Flair;
-const Comment = require("./models").Comment;
 const User = require("./models").User;
 const Vote = require("./models").Vote;
 const Authorizer = require("../policies/post");
@@ -25,7 +26,8 @@ module.exports = {
           include: [{ model: User }]
         },
         { model: Vote, as: "votes" },
-        { model: Flair, as: "flair" }
+        { model: Flair, as: "flair" },
+        { model: Favorite, as: "favorites" }
       ]
     })
       .then(post => {

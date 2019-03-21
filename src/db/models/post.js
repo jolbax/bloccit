@@ -26,23 +26,33 @@ module.exports = (sequelize, DataTypes) => {
     Post.belongsTo(models.Topic, {
       foreignKey: "topicId",
       onDelete: "CASCADE"
-    })
+    });
     Post.belongsTo(models.Flair, {
       foreignKey: "flairId",
       as: "flair"
-    })
+    });
     Post.belongsTo(models.User, {
       foreignKey: "userId",
       onDelete: "CASCADE"
-    })
+    });
     Post.hasMany(models.Comment, {
       foreignKey: "postId",
       as: "comments"
-    })
+    });
     Post.hasMany(models.Vote, {
       foreignKey: "postId",
       as: "votes"
-    })
+    });
+    Post.hasMany(models.Favorite, {
+      foreignKey: "postId",
+      as: "favorites"
+    });
+    Post.afterCreate((post, callback) => {
+      return models.Favorite.create({
+        userId: post.userId,
+        postId: post.id
+      });
+    });
   };
 
   Post.prototype.getPoints = function () {
@@ -66,5 +76,8 @@ module.exports = (sequelize, DataTypes) => {
       .length === 1;
   }
 
+  Post.prototype.getFavoriteFor = function (userId) {
+    return this.favorites.find((favorite) => { return favorite.userId === userId});
+  }
   return Post;
 };

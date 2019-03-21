@@ -32,6 +32,7 @@
             <button type="submit" class="btn btn-danger">Delete</button>
           </form>
           <a href="/topics/<%= post.topicId %>/posts/<%= post.id %>/<%= locals.flair ? `flair/${flair.id}/edit`:"flair/new" %>" class="btn btn-outline-info"><%= locals.flair ? "Edit flair":"Add flair" %></a>
+          <% include ../favorites/favoriting.ejs %>
           <% } %>
         </div>
       </div>
