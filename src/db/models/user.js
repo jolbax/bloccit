@@ -39,18 +39,6 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: "userId",
       as: "favorites"
     })
-    User.addScope("allFavPostsFor", (userId) => {
-      return {
-        include: [{
-          model: models.Favorite,
-          as: "favorites",
-          include: [{ model: models.Post}],
-          where: {
-            userId: userId
-          }
-        }],
-      }
-    });
   };
 
 

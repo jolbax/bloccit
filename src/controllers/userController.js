@@ -1,5 +1,6 @@
 const userQueries = require("../db/queries.user.js");
 const passport = require("passport");
+const Authorizer = require("../policies/user");
 
 module.exports = {
   signUp(req, res, next) {
@@ -43,12 +44,19 @@ module.exports = {
     res.redirect("/");
   },
   show(req, res, next) {
+    let authorized = new Authorizer(req.user, req.params.id).show();
+
     userQueries.getUser(req.params.id, (err, result) => {
       if(err || result.user === undefined) {
         req.flash("notice", "No user found with that ID");
         res.redirect("/");
       } else {
-        res.render("users/show", {...result});
+        if(authorized){
+          res.render("users/show", {...result});
+        } else {
+          req.flash("notice", "You are not allowed to access this page");
+          res.redirect("/");
+        }
       }
     })
   }
