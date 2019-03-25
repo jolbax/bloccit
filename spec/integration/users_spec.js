@@ -1,11 +1,13 @@
+const base = "http://localhost:3000/users/";
 const request = require("request");
 const server = require("../../src/server");
-const base = "http://localhost:3000/users/";
-const User = require("../../src/db/models").User;
-const Topic = require("../../src/db/models").Topic;
-const Post = require("../../src/db/models").Post;
-const Comment = require("../../src/db/models").Comment;
+
 const sequelize = require("../../src/db/models/index").sequelize;
+const Comment = require("../../src/db/models").Comment;
+const Favorite = require("../../src/db/models").Favorite;
+const Post = require("../../src/db/models").Post;
+const Topic = require("../../src/db/models").Topic;
+const User = require("../../src/db/models").User;
 
 describe("routes: users", () => {
   beforeEach(done => {
@@ -91,6 +93,7 @@ describe("routes: users", () => {
     beforeEach((done) => {
       this.user;
       this.post;
+      this.topic;
       this.comment;
 
       User.create({
@@ -115,6 +118,7 @@ describe("routes: users", () => {
           }
         })
         .then((topic) => {
+          this.topic = topic
           this.post = topic.posts[0];
 
           Comment.create({
@@ -137,5 +141,37 @@ describe("routes: users", () => {
         done();
       });
     });
+
+    it("should present a list of favorite posts a user has tagged", (done) => {
+      User.create({
+        email: "staruser@tesla.com",
+        password: "password"
+      })
+      .then((newUser) => {
+        Post.create({
+          title: "Ice age 2",
+          body: "What a movie!",
+          topicId: this.topic.id,
+          userId: newUser.id
+        })
+        .then((newPost) => {
+          Favorite.create({
+            postId: newPost.id,
+            userId: this.user.id
+          })
+          .then((favorite) => {
+            request.get(`${base}${this.user.id}`, (err, res, body) => {
+              expect(body).toContain("Favorited Posts");
+              expect(body).toContain("Ice age 2");
+              done();
+            });
+          })
+          .catch((err) => {
+            console.log(err);
+            done();
+          })
+        })
+      })
+    })
   });
 });

@@ -33,9 +33,14 @@ module.exports = {
            Comment.scope({method: ["lastFiveFor", id]}).findAll()
            .then((comments) => {
              result["comments"] = comments;
-             callback(null, result);
+             User.scope({ method: ["allFavPostsFor", id]}).findAll()
+             .then((userFavorites) => {
+               result["favorites"] = userFavorites[0] ? userFavorites[0].favorites : null;
+               callback(null, result);
+             })
            })
            .catch((err) => {
+             console.log(err);
              callback(err);
            });
          });
